@@ -25,6 +25,13 @@ app.use(
 app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }));
 app.use(bodyParser.json({ limit: "20mb" }));
 
+// Servir la portada
+app.get("/", (req, res) => {
+  res.send(
+    "<h1>Bienvenido a la API de la Protectora</h1><p>Visita /animales para acceder a los datos de animales.</p>"
+  );
+});
+
 // Rutas de API
 const userRouter = require("./routes/userRoutes");
 const formsRouter = require("./routes/formsRoutes");
