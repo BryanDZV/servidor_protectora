@@ -10,6 +10,10 @@
     {
       "src": "/api/(.*)",
       "dest": "script.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/protectora/index.html"
     }
   ]
 }
