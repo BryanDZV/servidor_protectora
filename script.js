@@ -39,13 +39,13 @@ app.use("/test", testRouter);
 
 //PARA PROBAR QUE RECIBES LOS DATOS DEL SERVIDOR ES http://localhost:5002/test/test-animales OOO http://localhost:5002/animales
 
-// Servir archivos estáticos  este y el de spa son para cuando quero montar juntos el back y el front
-app.use(express.static(path.join(__dirname, "dist", "protectora")));
+// // Servir archivos estáticos  este y el de spa son para cuando quero montar juntos el back y el front
+// app.use(express.static(path.join(__dirname, "dist", "protectora")));
 
-// Ruta para manejar cualquier solicitud no manejada (SPA)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "protectora", "index.html"));
-});
+// // Ruta para manejar cualquier solicitud no manejada (SPA)
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "dist", "protectora", "index.html"));
+// });
 
 // Escuchar en el puerto especificado
 const PORT = process.env.PORT || 5002;
