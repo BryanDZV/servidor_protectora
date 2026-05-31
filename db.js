@@ -1,27 +1,16 @@
-//modulo para conectar mi base
-
 const mongoose = require("mongoose");
-require('dotenv').config();
-//const Animal = require("../Back/models/animalModel") //si uso el animal.find activo
-const DB_URL =process.env.DB_URL;// mongodb+srv://usuario:contraseña@cluster0.zqnzqqp.mongodb.net/nombredevuestroproyecto
 
 const connect = async () => {
   try {
-    // conectamos a nuestra BBDD
-    const db = await mongoose.connect(DB_URL);
+    const db = await mongoose.connect(process.env.DB_URL);
     const { name, host } = db.connection;
-    console.log(`conectado correctamente a base de datos de ${name} db en el host ${host}`);
+    console.log(
+      `Conectado correctamente a la base de datos de ${name} db en el host ${host}`,
+    );
   } catch (error) {
-    console.log("hemos tenido un error al conectar a la BBDD", error);
+    console.error(" Hemos tenido un error al conectar a la BBDD", error);
+    process.exit(1); // Detenemos la ejecución si no hay base de datos
   }
-
-  //  Animal.find({})
-  //  .then(animales => {
-  //     console.log("Animales encontrados:", animales);
-  //  })
-
-  //  .catch(err => {
-  //    console.error("Error al obtener datoso:", err);
-  //  });
 };
-module.exports = {connect};
+
+module.exports = { connect };
