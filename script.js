@@ -11,7 +11,10 @@ const testRouter = require("./routes/testRoutes");
 
 const app = express();
 
-connect();
+connect().catch((error) => {
+  console.error("No ha sido posible conectar con MongoDB", error);
+  process.exit(1);
+});
 
 // Middlewares globales
 app.use(corsMiddleware);
