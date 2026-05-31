@@ -6,11 +6,9 @@ const isAuth = async (req, res, next) => {
     const authorization = req.headers.authorization;
 
     if (!authorization || !authorization.startsWith("Bearer ")) {
-      return res
-        .status(401)
-        .json({
-          message: "No autorizado. Token no proporcionado o formato inválido.",
-        });
+      return res.status(401).json({
+        message: "No autorizado. Token no proporcionado o formato inválido.",
+      });
     }
 
     const token = authorization.split(" ")[1];
@@ -21,7 +19,7 @@ const isAuth = async (req, res, next) => {
     }
 
     const userLogged = await User.findById(tokenVerified.id).populate(
-      "pets favPets inProcessPets",
+      "pets favPets inProcessPets info",
     );
     if (!userLogged) {
       return res
@@ -33,12 +31,10 @@ const isAuth = async (req, res, next) => {
     req.user = userLogged;
     next(); // Pasa correctamente al controlador
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Error interno en la autenticación",
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Error interno en la autenticación",
+      error: error.message,
+    });
   }
 };
 
