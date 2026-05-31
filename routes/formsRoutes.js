@@ -1,31 +1,22 @@
-const express = require('express');
+const express = require("express");
 const {
-      getForm,
-    getFormById,
-    postForm,
-    putForm,
-    deleteForm,
-} = require('../controllers/forms.controller');
+  getForm,
+  getFormById,
+  postForm,
+  putForm,
+  deleteForm,
+} = require("../controllers/forms.controller");
 
-//---------------------------------INPUT---------------------------------
 const router = express.Router();
 
+router.get("/", getForm);
+router.get("/:id", getFormById);
 
+router.post("/register", postForm);
+router.post("/insertMany", postForm);
 
-//metodos GET
-router.get('/', getForm);
-router.get('/:id', getFormById);
+router.put("/:id", putForm);
 
-//metodos POST
-router.post('/register', postForm);
-router.post('/insertMany', postForm);
+router.delete("/:id", deleteForm);
 
-//metodos PUT
-router.put('/:id', putForm);
-
-//metodos DELETE
-router.delete('/:id', deleteForm);
-
-
-//---------------------------------OUTPUT---------------------------------
 module.exports = router;
