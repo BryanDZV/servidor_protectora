@@ -2,31 +2,41 @@ const mongoose = require("mongoose");
 
 const formSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    telf: { type: Number, required: true },
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    animal_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Animal",
+      required: true,
+    },
+    telf: { type: String, required: true },
     dni: { type: String, required: true },
-    direction: { type: String, required: true },
+    direccion: { type: String, required: true, alias: "direction" },
     postal: { type: Number, required: true },
     city: { type: String, required: true },
-    conditions: { type: Boolean, required: true },
-    pets: { type: String, required: true },
-    which: { type: String, required: true },
-    petfrienly: { type: String, required: true },
-    needs: { type: String, required: true },
-    expenses: { type: String, required: true },
-    food: { type: String, required: true },
-    home: { type: String, required: true },
-    rental: { type: String, required: true },
-    casero: { type: String, required: true },
-    removal: { type: String, required: true },
-    garden: { type: String, required: true },
-    family: { type: String, required: true },
-    agreement: { type: String, required: true },
-    visit: { type: String, required: true },
+    petFriendly: { type: Boolean, required: true, alias: "petfrienly" },
+    tieneMascotas: { type: Boolean, required: true, alias: "pets" },
+    tipoVivienda: {
+      type: String,
+      required: true,
+      enum: ["Piso", "Casa", "Finca"],
+      alias: "home",
+    },
+    alquilerOCompra: {
+      type: String,
+      required: true,
+      enum: ["Alquiler", "Propiedad"],
+      alias: "rental",
+    },
+    permisoCasero: { type: Boolean, required: true, alias: "casero" },
+    tieneJardin: { type: Boolean, required: true, alias: "garden" },
+    acuerdoVisitas: { type: Boolean, required: true, alias: "visit" },
   },
-  { timestamps: true },
+  { timestamps: true, collection: "forms" },
 );
 
-const Form = mongoose.model("Form", formSchema);
+const Form = mongoose.model("AdoptionForm", formSchema, "forms");
 module.exports = Form;
