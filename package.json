@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "start": "node script.js",
-    "dev": "nodemon server_insert/script.js"
+    "dev": "nodemon script.js",
+    "seed": "node seed.js",
+    "seed:reset": "node seed.js --reset=collections",
+    "seed:drop": "node seed.js --reset=database"
   },
   "private": true,
   "dependencies": {
@@ -18,6 +21,7 @@
     "mongoose": "^8.1.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
     "nodemon": "^3.0.3"
   },
   "engines": {
