@@ -1,113 +1,52 @@
 const express = require("express");
 const dotenv = require("dotenv");
 dotenv.config();
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const path = require("path"); // para poder unir rutas
+
 const { connect } = require("./db");
-
-// Inicializar la aplicación
-const app = express();
-
-// Conectar a la base de datos
-connect();
-
-// Habilitar CORS con opciones específicas
-app.use(
-  cors({
-    origin: "*", // Cambia esto según tu entornohttp://localhost:4200
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-// Configurar bodyParser para manejar solicitudes JSON y URL-encoded
-app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }));
-app.use(bodyParser.json({ limit: "20mb" }));
-
-// Servir la portada
-app.get("/", (req, res) => {
-  res.send(
-    "<h1>Bienvenido a la API de la Protectora</h1><p>Visita /animales para acceder a los datos de animales.</p>"
-  );
-});
-
-// Rutas de API
+const corsMiddleware = require("./middleware/corsuse");
 const userRouter = require("./routes/userRoutes");
 const formsRouter = require("./routes/formsRoutes");
 const animalesRoutes = require("./routes/animalesRoutes");
 const testRouter = require("./routes/testRoutes");
 
-// app.use("/", animalesRoutes);
+const app = express();
+
+connect();
+
+// Middlewares globales
+app.use(corsMiddleware);
+app.use(express.urlencoded({ limit: "20mb", extended: true }));
+app.use(express.json({ limit: "20mb" }));
+
+// Ruta de bienvenida
+app.get("/", (req, res) => {
+  res.send(
+    "<h1>Bienvenido a la API de la Protectora</h1><p>API funcionando correctamente.</p>",
+  );
+});
+
+// Rutas de API
 app.use("/animales", animalesRoutes);
 app.use("/form", formsRouter);
 app.use("/user", userRouter);
 app.use("/test", testRouter);
 
-//PARA PROBAR QUE RECIBES LOS DATOS DEL SERVIDOR ES http://localhost:5002/test/test-animales OOO http://localhost:5002/animales
+// Middleware Global de Manejo de Errores
+// Aquí llegan todos los errores arrojados por nuestro "catchAsync" en los controladores
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Error interno del servidor";
 
-// // Servir archivos estáticos  este y el de spa son para cuando quero montar juntos el back y el front
-// app.use(express.static(path.join(__dirname, "dist", "protectora")));
+  console.error(`[Error] ${statusCode} - ${message}`);
 
-// // Ruta para manejar cualquier solicitud no manejada (SPA)
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "dist", "protectora", "index.html"));
-// });
-
-// Escuchar en el puerto especificado
-const PORT = process.env.PORT || 5002;
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto : ${PORT}`); //`Servidor escuchando en el puerto http://localhost:${PORT}`
+  res.status(statusCode).json({
+    error: true,
+    statusCode,
+    message,
+  });
 });
 
-// const express = require("express");
-// const dotenv = require("dotenv");
-// dotenv.config();
-// const axios = require("axios");
-// const PORT = process.env.PORT;
-// const { connect } = require("./hola/db");
-// const cors = require('cors');
-// const bodyParser = require('body-parser')
-
-// // nos tenemos que traer nuestra función connect que hemos exportando anteriormente
-// const app = express();
-
-// // aqui iniciamos nuestra funcion connect que es la que nos permitira estar ligados o conectados a nuestra base de datos
-// connect();
-
-// // Habilitar CORS para todas las solicitudes cone sto puedo hacer peti desde front
-// app.use(cors({
-//   origin: '*', // http://localhost:4200Cambia esto a tu URL de frontend en producción
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Content-Type', 'Authorization']
-// }));
-
-// // nos vamos a traer nuestro router que esta ahora mismo exportado en nuestra carpeta de routes
-
-// const userRouter = require ('./Back/routes/userRoutes');
-// const formsRouter = require ('./Back/routes/formsRoutes');
-// const animalesRoutes = require("./back/routes/animalesRoutes");
-// // const Animal = require("./back/models/animalModel");
-// app.use(
-//   bodyParser.urlencoded({
-//     limit: '20mb',
-//     extended: true
-//   })
-// )
-// app.use(
-//   bodyParser.json({
-//     limit: '20mb'
-//   })
-// )
-
-// app.use("/animales", animalesRoutes);
-// app.use("/form",formsRouter)
-// app.use("/user",userRouter)
-
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
-
-// // Escucha en el puerto especificado
-// app.listen(PORT, () => {
-//     console.log(`Servidor escuchando en el puerto http://localhost:${PORT}`);
-// });
+const PORT = process.env.PORT || 5002;
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor escuchando en el puerto : ${PORT}`);
+});
