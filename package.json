@@ -1,7 +1,6 @@
 {
   "name": "animales",
   "version": "0.0.0",
-
   "scripts": {
     "start": "node script.js",
     "dev": "nodemon server_insert/script.js"
@@ -10,7 +9,6 @@
   "dependencies": {
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "debug": "^4.3.6",
     "dotenv": "^16.4.4",
