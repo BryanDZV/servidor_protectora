@@ -1,67 +1,35 @@
-const Forms = require('../models/forms.model');
-//---------------------------------INPUT---------------------------------
+const formService = require("../services/form.service");
+const catchAsync = require("../utils/catchAsync");
 
-const getForm = async(req, res) => {
-    try {        
-        const allForms = await Forms.find();
-       
-        res.status(200).json(allForms);
-        
-    } catch (error) {
-        return res.status(500).json(error);
-    }
-};
+const getForm = catchAsync(async (req, res) => {
+  const allForms = await formService.getForms();
+  return res.status(200).json(allForms);
+});
 
-const getFormById = async(req, res) => {
-    try {
-        const {id} = req.params;
-        const myform = await Forms.findById(id);
-        return res.status(200).json(myform)
-    } catch (error) {
-        return res.status(500).json(error);
-    }
+const getFormById = catchAsync(async (req, res) => {
+  const myform = await formService.getFormById(req.params.id);
+  return res.status(200).json(myform);
+});
 
-};
+const postForm = catchAsync(async (req, res) => {
+  const inserted = await formService.createForm(req.body);
+  return res.status(201).json(inserted);
+});
 
-const postForm = async (req,res) => {
-    try {
-        const newForm = req.body;
-        console.log("new form",newForm);
-        const newforms = new Forms(newForm);
-        console.log("new formos",newforms);
-        
-        const inserted = await newforms.save();
-        res.status(201).json(inserted)
-    } catch (error) {
-        return res.status(500).json(error);
-    }
-};
+const putForm = catchAsync(async (req, res) => {
+  const updatedForm = await formService.updateForm(req.params.id, req.body);
+  return res.status(200).json(updatedForm);
+});
 
+const deleteForm = catchAsync(async (req, res) => {
+  const deletedForm = await formService.deleteForm(req.params.id);
+  return res.status(200).json(deletedForm);
+});
 
-const putForm = async(req, res) => {
-    try {
-        const {id} = req.params;
-        const putNewForm = new Forms(req.body);
-        putNewForm._id = id;
-        const updatedForm = await Forms.findByIdAndUpdate(id, putNewForm, {new: true});
-        return res.status(200).json(updatedForm);
-    } catch (error) {
-        return res.status(500).json(error);
-    }
-}
-const deleteForm = async(req, res) => {
-    try {
-        const {id} = req.params;
-        const deletedForm = await Forms.findByIdAndDelete(id);
-        return res.status(200).json(deletedForm);
-    } catch (error) {
-        return res.status(500).json(error);
-    }
-};
 module.exports = {
-    getForm,
-    getFormById,
-    postForm,
-    putForm,
-    deleteForm,
-}
+  getForm,
+  getFormById,
+  postForm,
+  putForm,
+  deleteForm,
+};

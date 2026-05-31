@@ -12,8 +12,7 @@ const router = express.Router();
 router.get("/", getForm);
 router.get("/:id", getFormById);
 
-router.post("/register", postForm);
-router.post("/insertMany", postForm);
+router.post("/", postForm);
 
 router.put("/:id", putForm);
 
