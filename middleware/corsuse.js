@@ -1,25 +1,22 @@
-// Add headers before the routes are defined
 const cors = require("cors");
 
-app.use(cors({
-    origin: 'http://localhost:5002'
-}));
+// Centralizamos los orígenes permitidos (Local de node, Local de Angular, Producción en Vercel)
+const allowedOrigins = [
+  "http://localhost:5002",
+  "http://localhost:4200",
+  "https://protectora-orcin.vercel.app",
+];
 
-app.use(function (req, res, next) {
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("No permitido por CORS"));
+    }
+  },
+  methods: "GET, POST, OPTIONS, PUT, PATCH, DELETE",
+  credentials: true,
+};
 
-    // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5002');
-
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept');
-
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
-
-    // Pass to next layer of middleware
-    next();
-});
+module.exports = cors(corsOptions);

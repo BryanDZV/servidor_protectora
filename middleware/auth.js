@@ -2,28 +2,44 @@ const { verifySign } = require("../jwt/jwt");
 const User = require("../models/user.model");
 
 const isAuth = async (req, res, next) => {
-    // console.log(req.headers);
+  try {
     const authorization = req.headers.authorization;
-    console.log('autorizado',authorization);
-    if (!authorization) {
-      return res.status(401).json({ message: "Unauthorized" });
+
+    if (!authorization || !authorization.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({
+          message: "No autorizado. Token no proporcionado o formato inválido.",
+        });
     }
+
     const token = authorization.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Token no provided" });
+    const tokenVerified = verifySign(token);
+
+    if (!tokenVerified) {
+      return res.status(401).json({ message: "Token inválido o expirado" });
     }
-    try {
-      var tokenVerified = verifySign(token);
-      const userLogged = await User.findById(tokenVerified.id).populate("pets favPets inProcessPets");
-      userLogged.password = null;
-      req.user = userLogged;
-      next() 
+
+    const userLogged = await User.findById(tokenVerified.id).populate(
+      "pets favPets inProcessPets",
+    );
+    if (!userLogged) {
+      return res
+        .status(404)
+        .json({ message: "Usuario asociado al token no encontrado" });
+    }
+
+    userLogged.password = undefined; // 'undefined' evita que viaje en el JSON final
+    req.user = userLogged;
+    next(); // Pasa correctamente al controlador
   } catch (error) {
-    return res.status(500).json(error);
+    return res
+      .status(500)
+      .json({
+        message: "Error interno en la autenticación",
+        error: error.message,
+      });
   }
-  next() 
 };
-
-
 
 module.exports = { isAuth };
