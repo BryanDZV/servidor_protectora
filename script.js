@@ -50,6 +50,11 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5002;
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor escuchando en el puerto : ${PORT}`);
-});
+
+if (process.env.VERCEL !== "1") {
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor escuchando en el puerto : ${PORT}`);
+  });
+}
+
+module.exports = app;
