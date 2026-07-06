@@ -1,12 +1,18 @@
+// Importar el framework Express para crear el servidor
 const express = require("express");
+// Importar dotenv para gestionar variables de entorno
 const dotenv = require("dotenv");
+// Configurar dotenv para cargar las variables del archivo .env
 dotenv.config();
 
 const { connect } = require("./db");
 const corsMiddleware = require("./middleware/corsuse");
 const userRouter = require("./routes/userRoutes");
+// Router para gestionar formularios de adopción
 const formsRouter = require("./routes/formsRoutes");
+// Router para gestionar los animales
 const animalesRoutes = require("./routes/animalesRoutes");
+// Router para rutas de prueba
 const testRouter = require("./routes/testRoutes");
 
 const app = express();
@@ -30,8 +36,11 @@ app.get("/", (req, res) => {
 
 // Rutas de API
 app.use("/animales", animalesRoutes);
+// Todas las rutas que empiecen con /form usarán formsRouter
 app.use("/form", formsRouter);
+// Todas las rutas que empiecen con /user usarán userRouter
 app.use("/user", userRouter);
+// Todas las rutas que empiecen con /test usarán testRouter
 app.use("/test", testRouter);
 
 // Middleware Global de Manejo de Errores
@@ -53,7 +62,7 @@ const PORT = process.env.PORT || 5002;
 
 if (process.env.VERCEL !== "1") {
   app.listen(PORT, () => {
-    console.log(`🚀 Servidor escuchando en el puerto : ${PORT}`);
+    console.log(` Servidor escuchando en el puerto : ${PORT}`);
   });
 }
 

@@ -16,4 +16,4 @@ const validationPassword = (password) => {
   return PASSWORD_REGEX.test(String(password));
 };
 
-module.exports = { validationEmail, validationPassword };
+export default { validationEmail, validationPassword };

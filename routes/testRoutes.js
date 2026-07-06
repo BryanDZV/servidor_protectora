@@ -1,4 +1,6 @@
+// Importar express para crear el router
 const express = require("express");
+// Crear una instancia de Router de Express
 const router = express.Router();
 const animalService = require("../services/animal.service");
 const catchAsync = require("../utils/catchAsync");
@@ -11,4 +13,5 @@ router.get(
   }),
 );
 
+// Exportar el router para poder usarlo en el archivo principal
 module.exports = router;

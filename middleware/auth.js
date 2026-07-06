@@ -1,6 +1,9 @@
+// Importar la función verifySign para verificar tokens JWT
 const { verifySign } = require("../jwt/jwt");
+// Importar el modelo User para buscar usuarios en la base de datos
 const User = require("../models/user.model");
 
+// Middleware para verificar que el usuario está autenticado
 const isAuth = async (req, res, next) => {
   try {
     const authorization = req.headers.authorization;

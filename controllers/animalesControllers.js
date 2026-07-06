@@ -29,6 +29,7 @@ const deleteAnimal = catchAsync(async (req, res) => {
   return res.status(200).json(deletedAnimal);
 });
 
+// Exportar todas las funciones para poder usarlas en otros módulos
 module.exports = {
   getAnimales,
   getAnimalById,

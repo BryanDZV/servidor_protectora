@@ -1,3 +1,4 @@
+// Importar mongoose para trabajar con MongoDB
 const mongoose = require("mongoose");
 
 const animalSchema = new mongoose.Schema(
