@@ -1,15 +1,11 @@
 const cors = require("cors");
+const config = require("../config/env");
 
-// Centralizamos los orígenes permitidos (Local de node, Local de Angular, Producción en Vercel)
-const allowedOrigins = [
-  "http://localhost:5002",
-  "http://localhost:4200",
-  "https://protectora-orcin.vercel.app",
-];
-
+// Lista blanca de orígenes (el origin del frontend). Sin `credentials: true`
+// el navegador no enviaría ni aceptaría la cookie httpOnly cross-origin.
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || config.corsOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("No permitido por CORS"));

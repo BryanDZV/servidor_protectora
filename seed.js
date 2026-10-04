@@ -1,11 +1,9 @@
-require("dotenv").config();
-
+const config = require("./config/env");
 const bcrypt = require("bcrypt");
-const { connectDB, disconnectDB } = require("./db");
+const { connectDB, disconnectDB } = require("./config/db");
 const {
   cleanupSeedCollections,
 } = require("./services/seed/seed-cleanup.service");
-const { seedAnimals } = require("./services/seed/animal.seed.service");
 const { seedUsers } = require("./services/seed/user.seed.service");
 const {
   seedAdoptionForms,
@@ -17,7 +15,7 @@ const parseSeedMode = () => {
   );
 
   if (!resetArgument) {
-    return process.env.SEED_RESET || "collections";
+    return config.seedReset;
   }
 
   return resetArgument.split("=")[1] || "collections";
@@ -31,18 +29,12 @@ const runSeed = async () => {
     await cleanupSeedCollections(resetMode);
 
     const passwordHash = await bcrypt.hash("12345678", 10);
-    const insertedAnimals = await seedAnimals();
-    const insertedUsers = await seedUsers({
-      animalIds: insertedAnimals,
-      passwordHash,
-    });
+    const insertedUsers = await seedUsers({ passwordHash });
     const insertedForms = await seedAdoptionForms({
-      userIds: insertedUsers,
-      animalIds: insertedAnimals,
+      userIds: insertedUsers.map((user) => user._id),
     });
 
     console.log("Seed ejecutado correctamente");
-    console.log(`Animales insertados: ${insertedAnimals.length}`);
     console.log(`Usuarios insertados: ${insertedUsers.length}`);
     console.log(`Formularios insertados: ${insertedForms.length}`);
   } catch (error) {

@@ -1,8 +1,14 @@
-const User = require("../../models/user.model");
-const { getRandomSubset } = require("../../utils/seed.utils");
+const User = require("../../models/User");
+const {
+  getRandomSubset,
+  createExternalAnimalId,
+} = require("../../utils/seed.utils");
 const usersData = require("../../Data/users.data.json");
 
-const seedUsers = async ({ animalIds, passwordHash }) => {
+const buildFakeExternalIds = (count) =>
+  Array.from({ length: count }, () => createExternalAnimalId());
+
+const seedUsers = async ({ passwordHash }) => {
   try {
     await User.deleteMany({});
 
@@ -10,13 +16,11 @@ const seedUsers = async ({ animalIds, passwordHash }) => {
       name: user.name,
       email: user.email,
       password: passwordHash,
-      role: user.role || "user",
-      favPets: getRandomSubset(animalIds, 5),
+      role: user.role === "admin" ? "admin" : "user",
+      favPets: getRandomSubset(buildFakeExternalIds(5), 2),
     }));
 
-    const insertedUsers = await User.insertMany(usersPayload);
-
-    return insertedUsers;
+    return await User.insertMany(usersPayload);
   } catch (error) {
     throw new Error(`Falló el seeding de la colección User: ${error.message}`);
   }

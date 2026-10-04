@@ -1,90 +1,72 @@
 const mongoose = require("mongoose");
-const Form = require("../models/forms.model");
-const Animal = require("../models/animalModel");
-const User = require("../models/user.model");
+const Form = require("../models/AdoptionForm");
+const User = require("../models/User");
+const AppError = require("../utils/AppError");
 
-const normalizeFormPayload = (payload = {}) => ({
-  user_id: payload.user_id || payload.userId,
-  animal_id: payload.animal_id || payload.animalId,
+const buildFormFields = (payload = {}) => ({
+  animalExternalId: payload.animalExternalId,
   telf: payload.telf,
   dni: payload.dni,
-  city: payload.city,
-  direccion: payload.direccion || payload.direction,
+  direccion: payload.direccion,
   postal: payload.postal,
-  petFriendly:
-    typeof payload.petFriendly === "boolean"
-      ? payload.petFriendly
-      : payload.petfrienly,
-  tieneMascotas:
-    typeof payload.tieneMascotas === "boolean"
-      ? payload.tieneMascotas
-      : payload.pets,
-  tipoVivienda: payload.tipoVivienda || payload.home,
-  alquilerOCompra: payload.alquilerOCompra || payload.rental,
-  permisoCasero:
-    typeof payload.permisoCasero === "boolean"
-      ? payload.permisoCasero
-      : payload.casero,
-  tieneJardin:
-    typeof payload.tieneJardin === "boolean"
-      ? payload.tieneJardin
-      : payload.garden,
-  acuerdoVisitas:
-    typeof payload.acuerdoVisitas === "boolean"
-      ? payload.acuerdoVisitas
-      : payload.visit,
+  city: payload.city,
+  petFriendly: payload.petFriendly,
+  tieneMascotas: payload.tieneMascotas,
+  tipoVivienda: payload.tipoVivienda,
+  alquilerOCompra: payload.alquilerOCompra,
+  permisoCasero: payload.permisoCasero,
+  tieneJardin: payload.tieneJardin,
+  acuerdoVisitas: payload.acuerdoVisitas,
 });
 
-const getForms = async () => {
-  return Form.find()
-    .populate("user_id animal_id")
-    .sort({ createdAt: -1 })
-    .lean();
+const isAdmin = (user) => user?.role === "admin";
+
+// `form.user` es un ObjectId o, si está populado, un documento de usuario.
+const ownerIdOf = (form) => String(form.user?._id ?? form.user);
+
+const assertOwnership = (form, user) => {
+  if (!form) {
+    throw new AppError("Formulario no encontrado", 404);
+  }
+  if (!isAdmin(user) && ownerIdOf(form) !== String(user._id)) {
+    throw new AppError("No tienes permiso para acceder a este formulario", 403);
+  }
 };
 
-const getFormById = async (id) => {
-  return Form.findById(id).populate("user_id animal_id").lean();
+const getForms = async (user) => {
+  // El admin ve todos; un usuario solo los suyos.
+  const filter = isAdmin(user) ? {} : { user: user._id };
+  return Form.find(filter).populate("user").sort({ createdAt: -1 }).lean();
 };
 
-const createForm = async (payload) => {
-  const normalizedPayload = normalizeFormPayload(payload);
+const getFormById = async (id, user) => {
+  const form = await Form.findById(id).populate("user").lean();
+  assertOwnership(form, user);
+  return form;
+};
+
+const createForm = async (userId, payload) => {
+  const fields = buildFormFields(payload);
+
+  if (!fields.animalExternalId) {
+    throw new AppError("El id del animal es obligatorio", 400);
+  }
+
   const session = await mongoose.startSession();
 
   try {
     let createdForm = null;
 
     await session.withTransaction(async () => {
-      const selectedAnimal = await Animal.findById(
-        normalizedPayload.animal_id,
-      ).session(session);
-
-      if (!selectedAnimal) {
-        const error = new Error("No se ha encontrado el animal solicitado");
-        error.statusCode = 404;
-        throw error;
-      }
-
-      if (selectedAnimal.estadoAdopcion === "Adoptado") {
-        const error = new Error(
-          "El animal ya está adoptado y no admite nuevas solicitudes",
-        );
-        error.statusCode = 409;
-        throw error;
-      }
-
-      [createdForm] = await Form.create([normalizedPayload], { session });
-
-      await Animal.updateOne(
-        { _id: selectedAnimal._id },
-        { $set: { estadoAdopcion: "Reservado" } },
-        { session },
-      );
+      [createdForm] = await Form.create([{ ...fields, user: userId }], {
+        session,
+      });
 
       await User.updateOne(
-        { _id: normalizedPayload.user_id },
+        { _id: userId },
         {
           $addToSet: {
-            inProcessPets: selectedAnimal._id,
+            inProcessPets: fields.animalExternalId,
             info: createdForm._id,
           },
         },
@@ -98,19 +80,39 @@ const createForm = async (payload) => {
   }
 };
 
-const updateForm = async (id, payload) => {
-  const { _id, ...cleanPayload } = payload || {};
+const updateForm = async (id, user, payload) => {
+  const form = await Form.findById(id);
+  assertOwnership(form, user);
 
-  return Form.findByIdAndUpdate(id, normalizeFormPayload(cleanPayload), {
+  return Form.findByIdAndUpdate(id, buildFormFields(payload), {
     new: true,
     runValidators: true,
   })
-    .populate("user_id animal_id")
+    .populate("user")
     .lean();
 };
 
-const deleteForm = async (id) => {
-  return Form.findByIdAndDelete(id).lean();
+const deleteForm = async (id, user) => {
+  const form = await Form.findById(id);
+  assertOwnership(form, user);
+
+  const deletedForm = await Form.findByIdAndDelete(id).lean();
+
+  // Limpiamos las referencias del usuario. Solo quitamos el animal de
+  // `inProcessPets` si no le quedan más formularios para ese mismo animal.
+  const stillInProcess = await Form.exists({
+    user: deletedForm.user,
+    animalExternalId: deletedForm.animalExternalId,
+  });
+
+  const pull = { info: deletedForm._id };
+  if (!stillInProcess) {
+    pull.inProcessPets = deletedForm.animalExternalId;
+  }
+
+  await User.updateOne({ _id: deletedForm.user }, { $pull: pull });
+
+  return deletedForm;
 };
 
 module.exports = {

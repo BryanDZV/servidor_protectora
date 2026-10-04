@@ -1,22 +1,16 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const adoptionFormSchema = new mongoose.Schema(
+const adoptionFormSchema = new Schema(
   {
-    user_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    animal_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Animal",
-      required: true,
-    },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    // ID del animal en RescueGroups (el animal no vive en Mongo).
+    animalExternalId: { type: String, required: true, index: true, trim: true },
     telf: { type: String, required: true, trim: true },
     dni: { type: String, required: true, trim: true },
-    city: { type: String, required: true, trim: true },
     direccion: { type: String, required: true, trim: true },
     postal: { type: Number, required: true },
+    city: { type: String, required: true, trim: true },
     petFriendly: { type: Boolean, required: true },
     tieneMascotas: { type: Boolean, required: true },
     tipoVivienda: {
@@ -33,12 +27,7 @@ const adoptionFormSchema = new mongoose.Schema(
     tieneJardin: { type: Boolean, required: true },
     acuerdoVisitas: { type: Boolean, required: true },
   },
-  {
-    timestamps: true,
-    collection: "forms",
-  },
+  { timestamps: true, collection: "forms" },
 );
 
-module.exports =
-  mongoose.models.AdoptionForm ||
-  mongoose.model("AdoptionForm", adoptionFormSchema);
+module.exports = mongoose.model("AdoptionForm", adoptionFormSchema);

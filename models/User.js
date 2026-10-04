@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    image: { type: String, required: false, trim: true },
+    image: { type: String, trim: true, default: "" },
     email: {
       type: String,
       required: true,
@@ -15,17 +15,18 @@ const userSchema = new Schema(
     password: { type: String, required: true, trim: true },
     role: {
       type: String,
-      enum: ["user", "admin", "tester"],
+      enum: ["user", "admin"],
       default: "user",
       trim: true,
     },
-    pets: [{ type: Schema.Types.ObjectId, ref: "Animal" }],
-    inProcessPets: [{ type: Schema.Types.ObjectId, ref: "Animal" }],
-    favPets: [{ type: Schema.Types.ObjectId, ref: "Animal" }],
+    // IDs externos de RescueGroups (los animales no viven en Mongo).
+    favPets: { type: [String], default: [] },
+    inProcessPets: { type: [String], default: [] },
+    pets: { type: [String], default: [] },
+    // Solicitudes de adopción (sí viven en Mongo).
     info: [{ type: Schema.Types.ObjectId, ref: "AdoptionForm" }],
   },
   { timestamps: true, collection: "users" },
 );
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+module.exports = mongoose.model("User", userSchema);

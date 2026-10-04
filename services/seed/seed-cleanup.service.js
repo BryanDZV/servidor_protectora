@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const SEED_COLLECTIONS = ["Animales", "users", "forms"];
+const SEED_COLLECTIONS = ["users", "forms"];
 
 const cleanupSeedCollections = async (mode = "collections") => {
   if (!mongoose.connection.db) {
@@ -24,13 +24,13 @@ const cleanupSeedCollections = async (mode = "collections") => {
   const existingCollections = await mongoose.connection.db
     .listCollections()
     .toArray();
-  const existingCollectionNames = new Set(
+  const existingNames = new Set(
     existingCollections.map((collection) => collection.name),
   );
 
   for (const collectionName of SEED_COLLECTIONS) {
-    if (existingCollectionNames.has(collectionName)) {
-      await mongoose.connection.dropCollection(collectionName);
+    if (existingNames.has(collectionName)) {
+      await mongoose.connection.db.dropCollection(collectionName);
       console.log(`Colección eliminada antes del seed: ${collectionName}`);
     }
   }
