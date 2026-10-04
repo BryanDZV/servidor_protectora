@@ -18,10 +18,10 @@ datos locales (favoritos, formularios, adopciones).
 - **MongoDB** + **Mongoose** para usuarios y formularios
 - **RescueGroups.org API v2** como fuente de animales
 - **JWT** para autenticación de usuarios
-- **bcrypt** para guardar contraseñas hasheadas
+- **bcryptjs** para hashear contraseñas (JS puro, sin compilación nativa; ideal en serverless)
 - **CORS** habilitado para conectar con el frontend
 - **Swagger / OpenAPI** para documentar la API (`swagger-jsdoc` + `swagger-ui-express`)
-- Preparado para desplegar en **Vercel**
+- Preparado para desplegar en **Vercel** (Node 24.x)
 
 ## Qué puede hacer la API
 
@@ -142,12 +142,20 @@ middleware de errores.
 
 ## Cómo arrancarlo
 
+Requisitos: **Node.js 24.x** (lo exige `package.json` → `engines`) y una base de
+datos MongoDB (local o Atlas).
+
 1. Clonar el repo
-2. Crear un archivo `.env` en la raíz con:
+2. Crear el `.env` a partir del ejemplo:
+   ```bash
+   cp .env.example .env
+   ```
+   Contenido (ver `.env.example`):
    ```
    DB_URL=tu_url_de_mongodb
    JWT_KEY=una_clave_secreta
    PORT=5002
+   NODE_ENV=development
 
    # CORS: origin del frontend (Angular). NO es la URL de la API.
    CORS_ORIGINS=http://localhost:4200,https://protectora-orcin.vercel.app
@@ -193,8 +201,35 @@ leen de RescueGroups):
 
 Los formularios de prueba apuntan a IDs externos ficticios.
 
+## Despliegue en Vercel
+
+El backend funciona como **función serverless**: `vercel.json` enruta todo a
+`script.js` y, cuando `VERCEL=1`, no se ejecuta `app.listen` (lo gestiona Vercel).
+
+Configura las variables en **Vercel → Settings → Environment Variables** (no subas el `.env`):
+
+| Variable | Valor |
+|---|---|
+| `DB_URL` | cadena de MongoDB (Atlas) |
+| `JWT_KEY` | secreto de firma de tokens |
+| `NODE_ENV` | `production` (activar `secure` en la cookie) |
+| `COOKIE_SAMESITE` | `none` (obligatorio si front y back están en dominios distintos) |
+| `CORS_ORIGINS` | `https://<tu-front>.vercel.app` |
+| `RESCUEGROUPS_APIKEY` | tu clave de RescueGroups |
+| `RESCUEGROUPS_API_URL` | `https://api.rescuegroups.org/http/v2.json` |
+
+Notas:
+- En Vercel **no** hace falta `PORT`.
+- El frontend y el backend suelen estar en dominios distintos (`*.vercel.app`), así
+  que la cookie de sesión necesita **`SameSite=None` + `Secure`**: por eso hay que
+  poner `COOKIE_SAMESITE=none` **y** `NODE_ENV=production`.
+- Tras cambiar variables de entorno, **redespliega**: los cambios no se aplican a un
+  deploy ya existente.
+- Node **24.x** viene fijado por `engines` en `package.json`.
+
 ## Notas
 
+- Las contraseñas se hashean con **bcryptjs** (compatible con hashes `bcrypt`).
 - **Animales no viven en Mongo:** se consultan a RescueGroups en cada petición.
   La API key queda solo en el servidor (el frontend nunca la ve).
 - `favPets`, `inProcessPets` y `pets` del usuario son **IDs externos** (String), no ObjectIds.
