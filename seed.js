@@ -1,5 +1,5 @@
 const config = require("./config/env");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const { connectDB, disconnectDB } = require("./config/db");
 const {
   cleanupSeedCollections,
