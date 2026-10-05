@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
 
+const config = require("./config/env");
 const corsMiddleware = require("./middleware/cors");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
