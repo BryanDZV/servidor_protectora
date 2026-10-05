@@ -37,6 +37,7 @@ const config = {
       "https://api.rescuegroups.org/http/v2.json",
     apiKey: process.env.RESCUEGROUPS_APIKEY || "nOnXnixt",
   },
+  frontendUrl: process.env.FRONTEND_URL || "https://protectora-orcin.vercel.app",
   seedReset: process.env.SEED_RESET || "collections",
   isProduction,
   isVercel,
